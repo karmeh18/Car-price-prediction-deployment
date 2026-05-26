@@ -1,0 +1,652 @@
+================================================================================
+VS CODE EXTENSIONS FOR AZURE DEVELOPMENT
+================================================================================
+
+Essential extensions to install for smooth Azure, Docker, and Python development
+
+================================================================================
+SECTION 1: ESSENTIAL EXTENSIONS (MUST HAVE)
+================================================================================
+
+1. AZURE TOOLS (OFFICIAL)
+   Name: Azure Tools (Extension Pack)
+   ID: ms-vscode.vscode-node-azure-pack
+   Link: https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack
+   
+   Includes:
+   ✓ Azure App Service
+   ✓ Azure Functions
+   ✓ Azure Storage
+   ✓ Azure Databases
+   ✓ Azure Static Web Apps
+   ✓ Azure Container Registry (ACR)
+   ✓ Azure Virtual Machines
+   ✓ Azure IoT Tools
+   ✓ Cosmos DB
+   ✓ Azure Resources
+   
+   Benefits:
+   - Manage Azure resources directly from VS Code
+   - Deploy apps without leaving editor
+   - View logs and metrics
+   - SSH into VMs
+   - Browse containers in ACR
+
+---
+
+2. AZURE ACCOUNT
+   Name: Azure Account
+   ID: ms-vscode.azure-account
+   Link: https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account
+   
+   Features:
+   - Single sign-on with Azure
+   - Manage multiple subscriptions
+   - View resource groups
+   - Filter and search resources
+   
+   Installation: Included in Azure Tools pack
+   
+   Quick Start:
+   - Install extension
+   - Click Azure icon on left sidebar
+   - Sign in with Microsoft account
+   - Select subscription
+
+---
+
+3. DOCKER
+   Name: Docker
+   ID: ms-azuretools.vscode-docker
+   Link: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
+   
+   Features:
+   - Build Docker images
+   - Push/pull from registries
+   - Run containers
+   - Debug containers
+   - Docker Compose support
+   - Syntax highlighting for Dockerfile
+   
+   Usage:
+   - Right-click Dockerfile: "Build Image"
+   - Right-click image: "Push..."
+   - View running containers
+   - View container logs
+
+---
+
+4. PYTHON
+   Name: Python
+   ID: ms-python.python
+   Link: https://marketplace.visualstudio.com/items?itemName=ms-python.python
+   
+   Features:
+   - IntelliSense
+   - Linting
+   - Debugging
+   - Testing
+   - Virtual environment support
+   - Jupyter notebooks
+   
+   Required for:
+   - Code completion
+   - Error detection
+   - Running/debugging Python
+
+---
+
+5. PYLANCE
+   Name: Pylance
+   ID: ms-python.vscode-pylance
+   Link: https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
+   
+   Features:
+   - Fast, feature-rich language server
+   - Type checking
+   - Better IntelliSense
+   - Code analysis
+   
+   Note: Automatically installed with Python extension
+
+================================================================================
+SECTION 2: HIGHLY RECOMMENDED EXTENSIONS
+================================================================================
+
+6. REST CLIENT
+   Name: REST Client
+   ID: humao.rest-client
+   Link: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+   
+   Purpose: Test API endpoints without Postman
+   
+   Usage:
+   1. Create file: requests.http
+   2. Write requests:
+      GET https://car-price-predictor.azurewebsites.net/
+      
+      POST https://car-price-predictor.azurewebsites.net/predictdata
+      Content-Type: application/x-www-form-urlencoded
+      
+      Company=Toyota&Engine=2.0&Transmission=Manual
+   
+   3. Click "Send Request" above each request
+
+---
+
+7. GIT GRAPH
+   Name: Git Graph
+   ID: mhutchie.git-graph
+   Link: https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph
+   
+   Purpose: Visualize git commits
+   
+   Benefits:
+   - See commit history visually
+   - Branch management
+   - Merge visualization
+   - Better than "git log"
+
+---
+
+8. YAML
+   Name: YAML
+   ID: redhat.vscode-yaml
+   Link: https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml
+   
+   Purpose: YAML syntax highlighting and validation
+   
+   Useful for:
+   - azure-pipelines.yml
+   - docker-compose.yml
+   - GitHub Actions workflows
+   - Kubernetes configs
+
+---
+
+9. TERRAFORM (Optional - if using Terraform)
+   Name: Terraform
+   ID: hashicorp.terraform
+   Link: https://marketplace.visualstudio.com/items?itemName=hashicorp.terraform
+   
+   Purpose: Infrastructure as Code
+   
+   Benefits:
+   - Syntax highlighting
+   - Validation
+   - Format checking
+   - Azure resource templates
+
+---
+
+10. JUPYTER (For Data Science)
+    Name: Jupyter
+    ID: ms-toolsai.jupyter
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter
+    
+    Purpose: Run Jupyter notebooks in VS Code
+    
+    Benefits:
+    - Test model training locally
+    - Data analysis
+    - Visualization
+
+================================================================================
+SECTION 3: CODE QUALITY EXTENSIONS
+================================================================================
+
+11. PYLINT
+    Name: PyLint
+    ID: ms-python.pylint
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-python.pylint
+    
+    Purpose: Python code linting
+    
+    Features:
+    - Find bugs
+    - Style issues
+    - Code smells
+    - Integration with VS Code problems panel
+
+---
+
+12. PYTHON FORMATTER (Black)
+    Name: Black Formatter
+    ID: ms-python.black-formatter
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter
+    
+    Purpose: Auto-format Python code
+    
+    Usage:
+    - Format on save (recommended)
+    - Right-click: "Format Document"
+    - Maintains consistent style
+
+---
+
+13. FLAKE8 (Alternative Linter)
+    Name: Flake8
+    ID: ms-python.flake8
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-python.flake8
+    
+    Purpose: More strict Python linting
+    
+    Note: Can use alongside PyLint
+
+---
+
+14. SONARLINT
+    Name: SonarLint
+    ID: SonarSource.sonarlint-vscode
+    Link: https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode
+    
+    Purpose: Code quality and security analysis
+    
+    Benefits:
+    - Detects vulnerabilities
+    - Code smells
+    - Best practices
+    - Real-time analysis
+
+================================================================================
+SECTION 4: PRODUCTIVITY EXTENSIONS
+================================================================================
+
+15. THUNDERCLIENT / POSTMAN (API Testing)
+    Name: ThunderClient
+    ID: rangav.vscode-thunder-client
+    Link: https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client
+    
+    Purpose: API testing inside VS Code
+    
+    Alternative: Postman extension
+    - Simpler than REST Client
+    - GUI-based
+    - Request history
+
+---
+
+16. MARKDOWN PREVIEW ENHANCED
+    Name: Markdown Preview Enhanced
+    ID: shd101wyy.markdown-preview-enhanced
+    Link: https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced
+    
+    Purpose: Better Markdown rendering
+    
+    Benefits:
+    - Preview documentation files
+    - Table of contents
+    - Code highlighting
+    - Export to PDF
+
+---
+
+17. BETTER COMMENTS
+    Name: Better Comments
+    ID: aaron-bond.better-comments
+    Link: https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments
+    
+    Purpose: Highlight different comment types
+    
+    Types:
+    - * Alert comment (red)
+    - ! Important comment (orange)
+    - ? Question comment (blue)
+    - TODO comment (green)
+    - // Crossed out
+
+---
+
+18. TODO HIGHLIGHT
+    Name: Todo Highlight
+    ID: wayou.vscode-todo-highlight
+    Link: https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight
+    
+    Purpose: Highlight TODO/FIXME comments
+    
+    Benefits:
+    - Visual organization
+    - Search TODOs easily
+    - Track tasks in code
+
+---
+
+19. INDENT RAINBOW
+    Name: Indent Rainbow
+    ID: oderwat.indent-rainbow
+    Link: https://marketplace.visualstudio.com/items?itemName=oderwat.indent-rainbow
+    
+    Purpose: Color-code indentation levels
+    
+    Benefits:
+    - Easier to spot indentation errors
+    - Clearer code structure
+    - Especially useful for Python
+
+================================================================================
+SECTION 5: AZURE-SPECIFIC EXTENSIONS
+================================================================================
+
+20. AZURE APP SERVICE
+    Name: Azure App Service
+    ID: ms-azuretools.vscode-azureappservice
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azureappservice
+    
+    Features:
+    - Deploy to App Service
+    - Manage app settings
+    - Stream logs
+    - Start/stop apps
+    - SSH into containers
+
+---
+
+21. AZURE CONTAINER REGISTRY
+    Name: Azure Container Registry
+    ID: ms-azuretools.vscode-azurecontainerregistry
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurecontainerregistry
+    
+    Features:
+    - Manage ACR images
+    - Push/pull images
+    - View image details
+    - Delete images
+    - Tag management
+
+---
+
+22. AZURE STORAGE
+    Name: Azure Storage
+    ID: ms-azuretools.vscode-azurestorage
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurestorage
+    
+    Features:
+    - Browse blob containers
+    - Upload/download files
+    - Manage storage accounts
+    - View file contents
+    - Generate SAS URLs
+
+================================================================================
+SECTION 6: DEPLOYMENT & CI/CD EXTENSIONS
+================================================================================
+
+23. GITHUB PULL REQUESTS
+    Name: GitHub Pull Requests and Issues
+    ID: GitHub.vscode-pull-request-github
+    Link: https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github
+    
+    Features:
+    - Create/review PRs in VS Code
+    - Comment on code
+    - Check CI status
+    - Manage issues
+
+---
+
+24. AZURE PIPELINES
+    Name: Azure Pipelines
+    ID: ms-azure-devops.azure-pipelines
+    Link: https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines
+    
+    Features:
+    - View pipeline status
+    - Trigger builds
+    - View build logs
+    - Track deployments
+
+---
+
+25. GITHUB CODESPACES (Cloud Development)
+    Name: GitHub Codespaces
+    ID: GitHub.codespaces
+    Link: https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces
+    
+    Features:
+    - Develop in cloud
+    - Full VS Code in browser
+    - No local setup needed
+
+================================================================================
+RECOMMENDED INSTALLATION CHECKLIST
+================================================================================
+
+Tier 1 (Essential - Install First):
+□ Azure Tools (ms-vscode.vscode-node-azure-pack)
+□ Docker (ms-azuretools.vscode-docker)
+□ Python (ms-python.python)
+□ Pylance (ms-python.vscode-pylance) [Auto-installs with Python]
+
+Tier 2 (Highly Recommended):
+□ REST Client (humao.rest-client)
+□ Git Graph (mhutchie.git-graph)
+□ YAML (redhat.vscode-yaml)
+□ Black Formatter (ms-python.black-formatter)
+
+Tier 3 (Code Quality):
+□ PyLint (ms-python.pylint)
+□ SonarLint (SonarSource.sonarlint-vscode)
+
+Tier 4 (Productivity):
+□ Better Comments (aaron-bond.better-comments)
+□ Todo Highlight (wayou.vscode-todo-highlight)
+□ Indent Rainbow (oderwat.indent-rainbow)
+
+Tier 5 (Optional):
+□ Jupyter (ms-toolsai.jupyter) [If doing data science]
+□ Terraform (hashicorp.terraform) [If using IaC]
+□ GitHub Codespaces (GitHub.codespaces) [For cloud dev]
+
+================================================================================
+INSTALLATION METHODS
+================================================================================
+
+Method 1: Install from VS Code
+1. Open VS Code
+2. Press Ctrl+Shift+X (open Extensions)
+3. Search for extension name
+4. Click Install
+
+Method 2: Command Line
+# Install multiple extensions at once
+code --install-extension ms-vscode.vscode-node-azure-pack
+code --install-extension ms-azuretools.vscode-docker
+code --install-extension ms-python.python
+code --install-extension ms-python.vscode-pylance
+code --install-extension humao.rest-client
+
+Method 3: VS Code Settings (Sync across devices)
+Settings > Profiles > Create Profile > Include Extensions
+
+================================================================================
+CONFIGURATION & BEST PRACTICES
+================================================================================
+
+1. Configure Python Path
+   File > Preferences > Settings > Search "python.defaultInterpreterPath"
+   Set to: path/to/venv/bin/python
+
+2. Configure Black Formatter
+   File > Preferences > Settings > Search "black"
+   Enable: "Format On Save"
+   Set: "Line Length" = 100
+
+3. Configure Docker Path
+   File > Preferences > Settings > Search "docker"
+   Set correct Docker executable path if needed
+
+4. Configure Azure Account
+   - Click Azure icon (left sidebar)
+   - Sign in with Microsoft account
+   - Select subscription
+   - View all resources
+
+5. Azure Activity View
+   Open: Command Palette > Azure: Show Output Channel
+   View all Azure CLI commands executed
+
+================================================================================
+KEYBOARD SHORTCUTS FOR EXTENSIONS
+================================================================================
+
+Command Palette (Master Shortcut):
+   Windows/Linux: Ctrl+Shift+P
+   Mac: Cmd+Shift+P
+
+Extensions Sidebar:
+   Windows/Linux: Ctrl+Shift+X
+   Mac: Cmd+Shift+X
+
+Format Document (Black Formatter):
+   Windows/Linux: Shift+Alt+F
+   Mac: Shift+Option+F
+
+Toggle Git Graph:
+   Command: Git Graph: View
+   Or: Use Git Graph icon
+
+Open Terminal:
+   Windows/Linux: Ctrl+`
+   Mac: Cmd+`
+
+Toggle Problems Panel:
+   Windows/Linux: Ctrl+Shift+M
+   Mac: Cmd+Shift+M
+
+================================================================================
+WORKFLOW EXAMPLE: FULL DEVELOPMENT CYCLE
+================================================================================
+
+1. Start Development
+   - Open folder: File > Open Folder > car_prediction_project
+   - Select Python interpreter (venv)
+   - Extensions auto-activate
+
+2. Code Development
+   - Write Python code
+   - PyLint highlights errors in real-time
+   - Black formatter auto-formats on save
+   - IntelliSense suggests completions
+
+3. Test Locally
+   - Run: Right-click > Run Python File
+   - Or: Terminal > Run Task
+   - View output in Debug Console
+
+4. Docker Build
+   - Right-click Dockerfile
+   - Select: Build Image
+   - View build progress
+   - Specify image name: car-predictor:latest
+
+5. Push to ACR
+   - Right-click image (Docker view)
+   - Select: Push...
+   - Choose registry: Azure Container Registry
+   - Confirm authentication
+
+6. Deploy to Azure
+   - Click Azure icon (sidebar)
+   - Right-click Web App (car-price-predictor)
+   - Select: Deploy
+   - Choose Docker image
+   - Wait for deployment
+
+7. Monitor
+   - Right-click Web App
+   - Select: Streaming Logs
+   - Watch real-time logs
+   - Test endpoint
+
+8. Git Commit
+   - View Git Graph
+   - Commit changes
+   - Push to GitHub
+   - Workflow auto-triggers
+
+================================================================================
+TROUBLESHOOTING EXTENSIONS
+================================================================================
+
+Extension Not Showing Up:
+- Reload: Cmd+Shift+P > Developer: Reload Window
+- Reinstall: Uninstall and reinstall
+
+Python Extension Issues:
+- Select Interpreter: Cmd+Shift+P > Python: Select Interpreter
+- Choose venv/bin/python
+
+Docker Extension Issues:
+- Verify Docker running: docker --version
+- Check Docker permissions: docker ps
+
+Azure Extension Not Authenticating:
+- Sign out: Cmd+Shift+P > Azure: Sign Out
+- Sign in again: Cmd+Shift+P > Azure: Sign In
+
+Performance Issues:
+- Check extensions using: Cmd+Shift+P > Developer: Show Running Extensions
+- Disable unused extensions
+
+================================================================================
+RECOMMENDED SETTINGS.JSON
+================================================================================
+
+Add these to your VS Code settings.json:
+
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.black-formatter",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintArgs": ["--max-line-length=100"],
+  "python.testing.pytestEnabled": true,
+  "docker.showDebugingPrompt": false,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/venv": true,
+    "**/.vscode": false
+  }
+}
+
+================================================================================
+SUMMARY
+================================================================================
+
+Minimal Setup (5 extensions):
+1. Azure Tools
+2. Docker
+3. Python
+4. REST Client
+5. Git Graph
+
+Recommended Setup (12 extensions):
++ YAML
++ Black Formatter
++ PyLint
++ Better Comments
++ Indent Rainbow
++ SonarLint
++ GitHub Pull Requests
++ Markdown Preview Enhanced
+
+Full Setup (25+ extensions):
+All of the above + Jupyter, Terraform, Codespaces, etc.
+
+Start with Tier 1 & 2, then add others as needed!
+
+================================================================================
