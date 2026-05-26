@@ -37,7 +37,6 @@ spam/
 # Documentation
 *.md
 DOCKER_*.md
-*.txt
 
 # Testing
 test_*.py
