@@ -11,4 +11,3 @@ dill
 seaborn
 optuna
 scipy
--e .
