@@ -11,8 +11,11 @@ from src.utils import load_obj
 class PredictPipeline:
     def predict(self,feature):
         try:
-            model_path=os.path.join("artifacts",'model.pkl')
-            processor_path=os.path.join('artifacts','preprocessor.pkl')
+            # Get absolute path for cross-platform compatibility (local & Azure)
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(current_dir)
+            model_path = os.path.join(project_root, "artifacts", 'model.pkl')
+            processor_path = os.path.join(project_root, 'artifacts', 'preprocessor.pkl')
             logging.info("Model and Preprocessor object has been loaded")
 
             model=load_obj(model_path)

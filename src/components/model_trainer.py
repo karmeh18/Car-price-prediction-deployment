@@ -26,7 +26,9 @@ from src.utils import calculate_mape, save_object, evaluate_models
 @dataclass
 class ModelTrainer:
     def initiate_model_trainer(self,train_arr,test_arr):
-        self.model_trainer_config=os.path.join('artifacts',"model.pkl")
+        # Get absolute path for cross-platform compatibility
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.model_trainer_config = os.path.join(project_root, 'artifacts', "model.pkl")
 
         try:
             logging.info("Splitting Data into Training Data and Test Data")

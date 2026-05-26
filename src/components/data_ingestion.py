@@ -15,9 +15,11 @@ from src.components.data_transformation import DataTransformation
 from src.components.model_trainer import ModelTrainer
 
 class DataIngestionConfig:
-    train_data_path=os.path.join('artifacts','train.csv')
-    test_data_path=os.path.join('artifacts','test.csv')
-    raw_data_path=os.path.join('artifacts','data.csv')
+    # Get absolute path for cross-platform compatibility
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    train_data_path = os.path.join(project_root, 'artifacts', 'train.csv')
+    test_data_path = os.path.join(project_root, 'artifacts', 'test.csv')
+    raw_data_path = os.path.join(project_root, 'artifacts', 'data.csv')
 
 class DataIngestion:
     def __init__(self):
@@ -56,10 +58,11 @@ if __name__=="__main__":
     print("🔍 Checking for existing model and data changes...")
     print("="*60)
     
-    # Path to source data
-    source_data_path = r'notebook\car_data.csv'
-    model_path = 'artifacts/model.pkl'
-    data_hash_file = 'artifacts/.data_hash'  # Store data checksum
+    # Get absolute paths for cross-platform compatibility
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    source_data_path = os.path.join(project_root, r'notebook\car_data.csv')
+    model_path = os.path.join(project_root, 'artifacts', 'model.pkl')
+    data_hash_file = os.path.join(project_root, 'artifacts', '.data_hash')
     
     # Check if model exists
     model_exists = os.path.exists(model_path)
@@ -118,7 +121,7 @@ if __name__=="__main__":
             
             if retrain.lower() != 'yes' and retrain.lower() != 'y':
                 print("\n✓ Using existing model")
-                print("  Model path: artifacts/model.pkl")
+                print(f"  Model path: {model_path}")
                 print("  To use model for predictions, run: python app.py")
                 sys.exit(0)  # Exit without retraining
             else:

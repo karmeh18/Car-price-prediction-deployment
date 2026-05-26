@@ -37,14 +37,17 @@ def standalone_retrain():
         test_path=test_data_path
     )
     print(f"✓ Data transformation completed")
-    print(f"  - Preprocessor saved: artifacts/preprocessor.pkl")
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    preprocessor_path = os.path.join(project_root, 'artifacts', 'preprocessor.pkl')
+    print(f"  - Preprocessor saved: {preprocessor_path}")
     
     # Step 3: Model Training (without hyperparameter optimization)
     print("\n[3/3] Model Training in progress...")
     model_trainer = ModelTrainer()
     mape_score = model_trainer.initiate_model_trainer(train_arr, test_arr)
     print(f"✓ Model training completed")
-    print(f"  - Model saved: artifacts/model.pkl")
+    model_path = os.path.join(project_root, 'artifacts', 'model.pkl')
+    print(f"  - Model saved: {model_path}")
     print(f"  - MAPE Score: {mape_score:.4f}")
     
     print("\n" + "=" * 60)

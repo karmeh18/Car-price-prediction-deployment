@@ -1,8 +1,12 @@
 from flask import Flask,request,render_template
 import numpy as np
 import pandas as pd
+import os
 from sklearn.preprocessing import StandardScaler
 from Pipeline.predict_pipeline import CustomData,PredictPipeline
+
+# Set working directory to project root for compatibility (local & Azure)
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 app=Flask(__name__, template_folder='templates')
 

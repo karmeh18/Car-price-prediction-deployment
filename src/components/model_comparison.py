@@ -403,7 +403,10 @@ class ModelComparison:
             
             # Step 7: Generate visualizations
             print("\n📊 Generating visualizations...")
-            visualizer = ModelVisualizer(output_dir='artifacts/reports')
+            # Get absolute path for cross-platform compatibility
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            reports_dir = os.path.join(project_root, 'artifacts', 'reports')
+            visualizer = ModelVisualizer(output_dir=reports_dir)
             
             plot_files = {
                 'CV Scores - Box Plot': visualizer.plot_cv_scores_box(self.cv_results),
@@ -437,7 +440,8 @@ class ModelComparison:
             
             # Step 8: Generate comprehensive report
             print("\n📄 Generating HTML report...")
-            report_generator = HTMLReportGenerator(output_dir='artifacts')
+            artifacts_dir = os.path.join(project_root, 'artifacts')
+            report_generator = HTMLReportGenerator(output_dir=artifacts_dir)
             
             # Filter out None plot files
             plot_files = {k: v for k, v in plot_files.items() if v is not None}
@@ -461,15 +465,18 @@ class ModelComparison:
             best_model.fit(X_full, y_full)
             
             # Save best model
-            save_object(os.path.join('artifacts', 'model.pkl'), best_model)
+            model_path = os.path.join(project_root, 'artifacts', 'model.pkl')
+            save_object(model_path, best_model)
             logging.info(f"Best model ({best_name}) trained and saved")
             
             print("\n" + "="*60)
             print("✅ MODEL COMPARISON COMPLETE")
             print("="*60)
-            print(f"📄 HTML Report: artifacts/model_comparison_report.html")
-            print(f"📊 JSON Report: artifacts/reports/model_comparison_report.json")
-            print(f"🤖 Best Model: artifacts/model.pkl")
+            html_report_path = os.path.join(artifacts_dir, 'model_comparison_report.html')
+            json_report_path = os.path.join(reports_dir, 'model_comparison_report.json')
+            print(f"📄 HTML Report: {html_report_path}")
+            print(f"📊 JSON Report: {json_report_path}")
+            print(f"🤖 Best Model: {model_path}")
             print("="*60)
             
             return best_model, best_name, report

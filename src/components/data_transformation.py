@@ -19,7 +19,9 @@ from src.utils import save_object, calculate_mape
 class DataTransformation:
     try:
         def get_data_transformation_object(self):
-            self.get_data_transformation_config=os.path.join('artifacts','preprocessor.pkl')
+            # Get absolute path for cross-platform compatibility
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            self.get_data_transformation_config = os.path.join(project_root, 'artifacts', 'preprocessor.pkl')
             cat_col=['Company', 'Engine', 'Transmission', 'Color', 'Body_Style', 'Dealer_Region']
             
             cat_pipeline=Pipeline(
