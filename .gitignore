@@ -66,10 +66,8 @@ MANIFEST
 .env.*.local
 
 # Project specific
-artifacts/
 logs/
 catboost_info/
-model.pkl
 
 # Testing
 .pytest_cache/
