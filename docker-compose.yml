@@ -1,0 +1,32 @@
+# Docker Compose - Orchestrate containers easily
+version: '3.8'
+
+services:
+  # Service name: car-price-predictor
+  car-predictor:
+    # Build from Dockerfile in current directory
+    build: .
+    
+    # Container name (what you see when running "docker ps")
+    container_name: car-price-predictor
+    
+    # Port mapping: <host-port>:<container-port>
+    # Access app at http://localhost:9090
+    ports:
+      - "9090:9090"
+    
+    # Volume mounts
+    volumes:
+      - .:/app
+      - /app/__pycache__
+      - ./artifacts:/app/artifacts  # Persist artifacts folder
+      - ./logs:/app/logs              # Persist logs folder
+    
+    # Environment variables
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    
+    # Keep container running
+    stdin_open: true
+    tty: true

@@ -1,0 +1,256 @@
+================================================================================
+EC2 DEPLOYMENT GUIDE - Car Price Prediction ML Project
+================================================================================
+
+PREREQUISITES:
+- EC2 instance (Ubuntu 22.04 LTS recommended)
+- Security group with inbound rules: 22 (SSH), 9090 (Flask app)
+- At least 2GB RAM, 10GB storage
+
+================================================================================
+STEP 1: CONNECT TO EC2 INSTANCE
+================================================================================
+
+ssh -i your-key.pem ec2-user@your-ec2-ip
+# or for Ubuntu
+ssh -i your-key.pem ubuntu@your-ec2-ip
+
+================================================================================
+STEP 2: INSTALL DOCKER & DOCKER COMPOSE
+================================================================================
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+sudo apt install -y docker.io
+
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Verify installations
+docker --version
+docker-compose --version
+
+# Add user to docker group (optional, to avoid sudo)
+sudo usermod -aG docker $USER
+newgrp docker
+
+================================================================================
+STEP 3: CLONE/UPLOAD PROJECT TO EC2
+================================================================================
+
+# Option A: Clone from GitHub
+git clone your-repo-url
+cd car_prediction_project
+
+# Option B: Upload via SCP
+scp -i your-key.pem -r /path/to/car_prediction_project ubuntu@your-ec2-ip:/home/ubuntu/
+
+================================================================================
+STEP 4: BUILD & RUN DOCKER CONTAINER
+================================================================================
+
+# Navigate to project directory
+cd car_prediction_project
+
+# Build Docker image
+docker build -t car-price-predictor:latest .
+
+# Run with Docker Compose
+docker-compose up -d
+
+# OR run directly with Docker
+docker run -d \
+  --name car-predictor \
+  -p 9090:9090 \
+  -v $(pwd)/artifacts:/app/artifacts \
+  -v $(pwd)/logs:/app/logs \
+  -e FLASK_ENV=production \
+  car-price-predictor:latest
+
+================================================================================
+STEP 5: VERIFY DEPLOYMENT
+================================================================================
+
+# Check container status
+docker ps
+
+# View logs
+docker logs -f car-predictor
+
+# Expected output:
+# ==========================================
+# 🐳 Docker Car Price Predictor
+# ==========================================
+# Step 1: Running Data Ingestion Pipeline...
+# (model training will start...)
+# Step 2: Starting Flask Application...
+# ✅ App will run on: http://localhost:9090
+
+================================================================================
+STEP 6: ACCESS THE APPLICATION
+================================================================================
+
+# Get EC2 public IP
+echo "Application URL: http://your-ec2-ip:9090"
+
+# Test the application
+curl http://your-ec2-ip:9090
+
+# In browser:
+# http://your-ec2-ip:9090
+
+================================================================================
+STEP 7: MANAGE CONTAINER
+================================================================================
+
+# Stop container
+docker-compose down
+
+# Remove all artifacts (fresh start)
+docker-compose down -v
+
+# View container logs
+docker logs car-predictor
+
+# Execute command inside container
+docker exec -it car-predictor bash
+
+# Check artifacts
+docker exec car-predictor ls -la /app/artifacts/
+
+================================================================================
+ARTIFACTS STRUCTURE IN CONTAINER
+================================================================================
+
+/app/artifacts/
+├── model.pkl                        (Trained ML model)
+├── model_comparison_report.html     (Comprehensive HTML report)
+├── .data_hash                       (Data checksum for change detection)
+└── reports/
+    ├── model_comparison_report.json (All metrics in JSON)
+    ├── cv_scores_box.png           (Cross-validation plot)
+    ├── residuals_analysis.png      (Residuals visualization)
+    └── (all other PNG visualizations)
+
+================================================================================
+ENVIRONMENT VARIABLES
+================================================================================
+
+Set these in docker-compose.yml or when running:
+
+FLASK_ENV=production              (Production mode)
+PYTHONUNBUFFERED=1                (Unbuffered Python output)
+FLASK_APP=app.py                  (Flask entry point)
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: Container exits immediately
+Solution: Check logs with: docker logs car-predictor
+
+Problem: Port 9090 already in use
+Solution: Use different port: docker run -p 8080:9090
+
+Problem: Out of memory
+Solution: Increase EC2 instance size or add swap:
+  sudo fallocate -l 4G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+
+Problem: Permission denied on artifacts
+Solution: Fix permissions:
+  docker exec car-predictor chmod -R 777 /app/artifacts
+
+Problem: Model training takes too long
+Solution: Container runs model comparison by default (5-10 min)
+  Wait for "Starting Flask Application" message
+
+================================================================================
+PERFORMANCE OPTIMIZATION
+================================================================================
+
+1. Use multi-stage builds (optional):
+   - Reduces final image size
+   - Modify Dockerfile with FROM statements
+
+2. Use smaller base image:
+   - Currently using: python:3.10-slim
+   - Consider: python:3.10-alpine (but may need extra deps)
+
+3. Persist volume between deployments:
+   - Artifacts folder is mounted as volume
+   - Models persist even if container restarts
+
+4. Enable auto-restart:
+   docker run --restart=always ...
+   or in docker-compose:
+   restart_policy:
+     condition: on-failure
+     max_attempts: 3
+
+================================================================================
+SCALE TO PRODUCTION
+================================================================================
+
+For production with load balancing:
+
+1. Use ECR (Elastic Container Registry)
+   aws ecr create-repository --repository-name car-predictor
+   docker tag car-predictor:latest [account].dkr.ecr.[region].amazonaws.com/car-predictor:latest
+   docker push [account].dkr.ecr.[region].amazonaws.com/car-predictor:latest
+
+2. Use ECS or EKS for orchestration
+   - Auto-scaling
+   - Load balancing
+   - Health checks
+
+3. Use RDS for model metadata storage
+   - Track model versions
+   - Store performance metrics
+
+4. Use S3 for artifacts storage
+   - Persistent model storage
+   - Backup reports
+
+================================================================================
+QUICK COMMANDS
+================================================================================
+
+# Start fresh deployment
+docker-compose down
+docker-compose up -d
+
+# View live logs
+docker-compose logs -f
+
+# Restart container
+docker-compose restart
+
+# Remove container (keeps volumes)
+docker-compose down
+
+# Full cleanup
+docker-compose down -v
+docker image rm car-price-predictor:latest
+
+# SSH into container
+docker-compose exec car-predictor bash
+
+# Check resources
+docker stats car-predictor
+
+================================================================================
+USEFUL LINKS
+================================================================================
+
+Docker Documentation: https://docs.docker.com/
+Docker Compose: https://docs.docker.com/compose/
+AWS EC2: https://docs.aws.amazon.com/ec2/
+Flask Deployment: https://flask.palletsprojects.com/deployment/
+
+================================================================================

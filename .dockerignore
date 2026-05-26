@@ -1,0 +1,50 @@
+# Git files
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Virtual environment
+.env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.iml
+.code-workspace
+
+# Project files
+.DS_Store
+*.log
+logs/
+catboost_info/
+
+# Artifacts (keep only necessary in production)
+artifacts/
+
+# Temporary
+*.tmp
+spam/
+
+# Documentation
+*.md
+DOCKER_*.md
+*.txt
+
+# Testing
+test_*.py
+.pytest_cache/
+.coverage
+
+# Development
+.github/
+.git*
+.editorconfig
