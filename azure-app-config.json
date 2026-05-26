@@ -1,0 +1,61 @@
+{
+  "appName": "car-price-predictor",
+  "resourceGroup": "car-prediction-rg",
+  "location": "eastus",
+  
+  "containerRegistry": {
+    "name": "carpredictionacr",
+    "sku": "Basic",
+    "adminEnabled": true
+  },
+  
+  "appService": {
+    "plan": "car-prediction-asp",
+    "sku": "B1",
+    "isLinux": true,
+    "numberOfWorkers": 1
+  },
+  
+  "storage": {
+    "name": "carpredictionstorage",
+    "sku": "Standard_LRS",
+    "containers": [
+      "artifacts",
+      "models",
+      "reports",
+      "logs"
+    ]
+  },
+  
+  "environmentVariables": {
+    "FLASK_ENV": "production",
+    "PYTHONUNBUFFERED": "1",
+    "FLASK_APP": "app.py",
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "true"
+  },
+  
+  "ports": {
+    "internal": 9090,
+    "external": 80,
+    "https": 443
+  },
+  
+  "scaling": {
+    "autoscaleMinInstances": 1,
+    "autoscaleMaxInstances": 3,
+    "cpuThreshold": 80,
+    "memoryThreshold": 85
+  },
+  
+  "monitoring": {
+    "enableApplicationInsights": true,
+    "logRetentionDays": 30,
+    "alertEnabled": true
+  },
+  
+  "docker": {
+    "image": "car-predictor:latest",
+    "startupFile": "docker-entrypoint.sh",
+    "healthCheckPath": "/"
+  }
+}

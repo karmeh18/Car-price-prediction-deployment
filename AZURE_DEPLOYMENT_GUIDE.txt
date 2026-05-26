@@ -1,0 +1,567 @@
+================================================================================
+AZURE DEPLOYMENT GUIDE - Car Price Prediction ML Project
+================================================================================
+
+This guide covers deploying the Car Price Prediction ML project to Azure using:
+- Azure Container Registry (ACR) - for storing Docker images
+- Azure App Service - for running the containerized application
+- Azure Storage - for persisting artifacts and reports
+
+================================================================================
+PREREQUISITES:
+================================================================================
+
+1. Azure Subscription
+   - Create free account: https://azure.microsoft.com/free/
+   - Free tier: $200 credit + 12 months free services
+
+2. Azure CLI
+   - Download: https://learn.microsoft.com/cli/azure/install-azure-cli
+   - Or use: Azure Cloud Shell (browser-based)
+
+3. Docker installed locally (for building images)
+   - Or use: Azure Container Registry tasks (auto-build)
+
+4. Git repository on GitHub/Azure DevOps
+
+5. Project ready in Docker format (✓ Already done!)
+
+================================================================================
+STEP 1: INSTALL AZURE CLI & LOGIN
+================================================================================
+
+# Install Azure CLI
+# Windows: https://aka.ms/installazurecliwindows
+# Mac: brew install azure-cli
+# Linux: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+# Login to Azure
+az login
+
+# Set default subscription
+az account set --subscription "Your Subscription Name or ID"
+
+# Verify login
+az account show
+
+================================================================================
+STEP 2: CREATE AZURE RESOURCES
+================================================================================
+
+# Set variables
+RESOURCE_GROUP="car-prediction-rg"
+CONTAINER_REGISTRY="carpredictionacr"  # Must be lowercase, unique
+APP_SERVICE_PLAN="car-prediction-asp"
+APP_NAME="car-price-predictor"
+LOCATION="eastus"
+
+# 2.1: Create Resource Group
+az group create \
+  --name $RESOURCE_GROUP \
+  --location $LOCATION
+
+# 2.2: Create Container Registry
+az acr create \
+  --resource-group $RESOURCE_GROUP \
+  --name $CONTAINER_REGISTRY \
+  --sku Basic \
+  --admin-enabled true
+
+# Get ACR login server
+ACR_LOGIN_SERVER=$(az acr show \
+  --resource-group $RESOURCE_GROUP \
+  --name $CONTAINER_REGISTRY \
+  --query loginServer \
+  --output tsv)
+
+echo "ACR Login Server: $ACR_LOGIN_SERVER"
+
+# Get ACR credentials
+az acr credential show \
+  --resource-group $RESOURCE_GROUP \
+  --name $CONTAINER_REGISTRY
+
+# 2.3: Create App Service Plan
+az appservice plan create \
+  --name $APP_SERVICE_PLAN \
+  --resource-group $RESOURCE_GROUP \
+  --sku B1 \
+  --is-linux
+
+# 2.4: Create Web App
+az webapp create \
+  --resource-group $RESOURCE_GROUP \
+  --plan $APP_SERVICE_PLAN \
+  --name $APP_NAME \
+  --deployment-container-image-name-user $ACR_LOGIN_SERVER/car-predictor:latest
+
+================================================================================
+STEP 3: BUILD & PUSH DOCKER IMAGE TO ACR
+================================================================================
+
+# 3.1: Method A - Build locally and push
+
+# Login to ACR
+az acr login --name $CONTAINER_REGISTRY
+
+# Build image locally
+docker build -t car-predictor:latest .
+
+# Tag image for ACR
+docker tag car-predictor:latest $ACR_LOGIN_SERVER/car-predictor:latest
+
+# Push to ACR
+docker push $ACR_LOGIN_SERVER/car-predictor:latest
+
+# 3.2: Method B - Build in ACR (recommended)
+# No need to build locally, Azure builds it
+
+az acr build \
+  --registry $CONTAINER_REGISTRY \
+  --image car-predictor:latest \
+  --file Dockerfile .
+
+# View images in ACR
+az acr repository list --name $CONTAINER_REGISTRY
+
+================================================================================
+STEP 4: CONFIGURE APP SERVICE WITH DOCKER IMAGE
+================================================================================
+
+# Get ACR credentials for authentication
+USERNAME=$(az acr credential show \
+  --name $CONTAINER_REGISTRY \
+  --query username \
+  --output tsv)
+
+PASSWORD=$(az acr credential show \
+  --name $CONTAINER_REGISTRY \
+  --query passwords[0].value \
+  --output tsv)
+
+# Configure App Service with container
+az webapp config container set \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --docker-custom-image-name $ACR_LOGIN_SERVER/car-predictor:latest \
+  --docker-registry-server-url https://$ACR_LOGIN_SERVER \
+  --docker-registry-server-username $USERNAME \
+  --docker-registry-server-password $PASSWORD
+
+# Restart app
+az webapp restart \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP
+
+# Get app URL
+APP_URL=$(az webapp show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query defaultHostName \
+  --output tsv)
+
+echo "Application URL: https://$APP_URL"
+
+================================================================================
+STEP 5: CONFIGURE ENVIRONMENT VARIABLES
+================================================================================
+
+# Set Flask environment
+az webapp config appsettings set \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --settings \
+    FLASK_ENV=production \
+    PYTHONUNBUFFERED=1 \
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
+
+# Check settings
+az webapp config appsettings list \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP
+
+================================================================================
+STEP 6: CONFIGURE STORAGE FOR ARTIFACTS
+================================================================================
+
+# 6.1: Create Storage Account
+STORAGE_ACCOUNT="carpredictionstorage"
+
+az storage account create \
+  --name $STORAGE_ACCOUNT \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
+  --sku Standard_LRS
+
+# 6.2: Create blob containers
+az storage container create \
+  --account-name $STORAGE_ACCOUNT \
+  --name artifacts
+
+az storage container create \
+  --account-name $STORAGE_ACCOUNT \
+  --name models
+
+az storage container create \
+  --account-name $STORAGE_ACCOUNT \
+  --name reports
+
+# 6.3: Get storage credentials
+STORAGE_KEY=$(az storage account keys list \
+  --account-name $STORAGE_ACCOUNT \
+  --query [0].value \
+  --output tsv)
+
+STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=$STORAGE_ACCOUNT;AccountKey=$STORAGE_KEY;EndpointSuffix=core.windows.net"
+
+# 6.4: Set as environment variable in App Service
+az webapp config appsettings set \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --settings STORAGE_CONNECTION_STRING="$STORAGE_CONNECTION_STRING"
+
+================================================================================
+STEP 7: SET UP CONTINUOUS DEPLOYMENT (Optional)
+================================================================================
+
+# 7.1: Enable auto-deploy from ACR
+az webapp deployment container config \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --enable-cd true
+
+# Get webhook URL
+WEBHOOK_URL=$(az webapp deployment container show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query webhookUrl \
+  --output tsv)
+
+echo "Webhook URL: $WEBHOOK_URL"
+
+# Create webhook in ACR (for auto-deploy on image push)
+az acr webhook create \
+  --registry $CONTAINER_REGISTRY \
+  --name appservice \
+  --actions push \
+  --uri $WEBHOOK_URL
+
+================================================================================
+STEP 8: MONITOR DEPLOYMENT
+================================================================================
+
+# Stream logs
+az webapp log tail \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP
+
+# View deployment history
+az webapp deployment list \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --output table
+
+# Get deployment details
+az webapp deployment show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --slot-name production
+
+================================================================================
+STEP 9: VERIFY DEPLOYMENT
+================================================================================
+
+# Check app status
+az webapp show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query state
+
+# Test endpoint
+curl https://$APP_URL/
+
+# Check logs for errors
+az webapp log tail --name $APP_NAME --resource-group $RESOURCE_GROUP
+
+# Expected output:
+# 🐳 Docker Car Price Predictor
+# Step 1: Running Data Ingestion Pipeline...
+# Step 2: Starting Flask Application...
+# ✅ App will run on: http://0.0.0.0:9090
+
+================================================================================
+STEP 10: SCALE & OPTIMIZE
+================================================================================
+
+# Scale up App Service Plan
+az appservice plan update \
+  --name $APP_SERVICE_PLAN \
+  --resource-group $RESOURCE_GROUP \
+  --sku S1
+
+# Configure auto-scaling
+az monitor autoscale create \
+  --resource-group $RESOURCE_GROUP \
+  --resource $APP_NAME \
+  --resource-type "Microsoft.Web/sites" \
+  --resource-parent-name $APP_SERVICE_PLAN \
+  --resource-parent-type "Microsoft.Web/serverfarms" \
+  --min-count 1 \
+  --max-count 3 \
+  --count 1
+
+================================================================================
+FILES NEEDED FOR AZURE DEPLOYMENT:
+================================================================================
+
+Core Files (Already prepared):
+✓ Dockerfile
+✓ docker-compose.yml
+✓ docker-entrypoint.sh
+✓ requirements.txt
+✓ src/ (entire source code)
+✓ app.py
+✓ templates/
+✓ .dockerignore
+✓ .gitignore
+
+Optional Azure-Specific Files:
+
+1. azure-pipelines.yml (for CI/CD)
+   - Automate build and deployment
+   - Run tests before deployment
+
+2. .github/workflows/azure-deploy.yml
+   - GitHub Actions workflow for Azure
+   - Auto-deploy on git push
+
+3. app-service-config.json
+   - Store configuration settings
+   - Database connection strings
+   - API keys (in Key Vault)
+
+================================================================================
+AZURE-SPECIFIC FILE: azure-pipelines.yml
+================================================================================
+
+Create: azure-pipelines.yml
+
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerRegistryServiceConnection: 'your-acr-connection'
+  imageRepository: 'car-predictor'
+  containerRegistry: 'your-registry.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build and Push
+  jobs:
+  - job: BuildImage
+    displayName: Build Docker Image
+    steps:
+    - task: Docker@2
+      displayName: Build and push image
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+
+- stage: Deploy
+  displayName: Deploy to App Service
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebAppContainer@1
+            displayName: Deploy Web App
+            inputs:
+              azureSubscription: 'your-subscription'
+              appName: 'car-price-predictor'
+              imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
+
+================================================================================
+GITHUB ACTIONS: .github/workflows/azure-deploy.yml
+================================================================================
+
+Create: .github/workflows/azure-deploy.yml
+
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Build and Push to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    
+    - name: Build Docker image
+      run: |
+        docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/car-predictor:${{ github.sha }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/car-predictor:${{ github.sha }}
+    
+    - name: Deploy to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'car-price-predictor'
+        images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/car-predictor:${{ github.sha }}
+
+================================================================================
+AZURE SECRETS FOR GITHUB ACTIONS:
+================================================================================
+
+Set these secrets in GitHub (Settings > Secrets and variables > Actions):
+
+1. AZURE_CREDENTIALS
+   az ad sp create-for-rbac --name github-deployer --role contributor
+
+2. REGISTRY_LOGIN_SERVER
+   your-registry.azurecr.io
+
+3. REGISTRY_USERNAME
+   Get from: az acr credential show --name your-registry
+
+4. REGISTRY_PASSWORD
+   Get from: az acr credential show --name your-registry
+
+5. AZURE_SUBSCRIPTION_ID
+   Get from: az account show --query id
+
+================================================================================
+TROUBLESHOOTING AZURE DEPLOYMENT:
+================================================================================
+
+Problem: Container won't start
+Solution: Check logs
+  az webapp log tail --name car-price-predictor --resource-group car-prediction-rg
+
+Problem: App Service says "Container doesn't respond to HTTP requests"
+Solution: Verify Flask listens on 0.0.0.0:9090
+  Check docker-entrypoint.sh and app.py
+
+Problem: Out of memory
+Solution: Upgrade App Service Plan
+  az appservice plan update --name car-prediction-asp --resource-group car-prediction-rg --sku S1
+
+Problem: Artifacts not persisting
+Solution: Use Azure Storage instead of local artifacts
+  Mount blob storage to container
+
+Problem: Authentication to ACR fails
+Solution: Regenerate credentials
+  az acr credential renew --name your-registry
+
+================================================================================
+COST ESTIMATION (Monthly):
+================================================================================
+
+Free tier (first 12 months):
+- App Service B1: Free
+- Container Registry: $5 (if free tier expired)
+- Storage: $0.02/GB
+
+Typical costs after free tier:
+- App Service B1: $15/month
+- Container Registry Basic: $5/month
+- Storage (10GB artifacts): $0.2/month
+- Total: ~$20/month
+
+Reduce costs:
+- Use free tier as long as possible
+- Use Consumption-based pricing
+- Delete unused resources
+
+================================================================================
+ADVANCED: AZURE CONTAINER INSTANCES (Serverless)
+================================================================================
+
+Faster deployment, no always-on cost:
+
+# Create container instance
+az container create \
+  --resource-group car-prediction-rg \
+  --name car-predictor \
+  --image $ACR_LOGIN_SERVER/car-predictor:latest \
+  --registry-login-server $ACR_LOGIN_SERVER \
+  --registry-username $USERNAME \
+  --registry-password $PASSWORD \
+  --dns-name-label car-price-predictor \
+  --ports 9090 \
+  --environment-variables \
+    FLASK_ENV=production \
+    PYTHONUNBUFFERED=1
+
+# Get IP
+az container show \
+  --resource-group car-prediction-rg \
+  --name car-predictor \
+  --query ipAddress.fqdn
+
+================================================================================
+QUICK DEPLOYMENT SCRIPT:
+================================================================================
+
+Save as: deploy-to-azure.sh
+
+#!/bin/bash
+
+RESOURCE_GROUP="car-prediction-rg"
+REGISTRY_NAME="carpredictionacr"
+APP_NAME="car-price-predictor"
+LOCATION="eastus"
+
+# Create resources
+az group create --name $RESOURCE_GROUP --location $LOCATION
+az acr create --resource-group $RESOURCE_GROUP --name $REGISTRY_NAME --sku Basic
+az appservice plan create --name car-prediction-asp --resource-group $RESOURCE_GROUP --sku B1 --is-linux
+az webapp create --resource-group $RESOURCE_GROUP --plan car-prediction-asp --name $APP_NAME
+
+# Build and push
+az acr build --registry $REGISTRY_NAME --image car-predictor:latest --file Dockerfile .
+
+echo "Deployment started!"
+echo "Check status: az webapp show --name $APP_NAME --resource-group $RESOURCE_GROUP"
+
+================================================================================
+USEFUL LINKS:
+================================================================================
+
+Azure App Service: https://learn.microsoft.com/azure/app-service/
+Azure Container Registry: https://learn.microsoft.com/azure/container-registry/
+Azure CLI Reference: https://learn.microsoft.com/cli/azure/
+Azure Pricing: https://azure.microsoft.com/pricing/
+Docker on Azure: https://learn.microsoft.com/azure/developer/docker/
+
+================================================================================
